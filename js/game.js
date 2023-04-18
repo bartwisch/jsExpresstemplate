@@ -98,6 +98,27 @@ window.addEventListener('DOMContentLoaded', function () {
 
         scene.onKeyboardObservable.add(({ event }) => onKeyDown(event), BABYLON.KeyboardEventTypes.KEYDOWN);
 
+        // Touch-Event-Listener hinzufügen
+        canvas.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            const touch = event.touches[0];
+            const touchX = touch.clientX - canvas.width / 2;
+            const touchY = -touch.clientY + canvas.height / 2;
+
+            spaceship.position.x = touchX;
+            spaceship.position.y = touchY;
+        });
+
+        canvas.addEventListener('touchmove', (event) => {
+            event.preventDefault();
+            const touch = event.touches[0];
+            const touchX = touch.clientX - canvas.width / 2;
+            const touchY = -touch.clientY + canvas.height / 2;
+
+            spaceship.position.x = touchX;
+            spaceship.position.y = touchY;
+        });
+
         let enemySpawnCounter = 0;
 
         scene.registerBeforeRender(() => {
