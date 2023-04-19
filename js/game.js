@@ -4,11 +4,9 @@ window.addEventListener('DOMContentLoaded', function () {
     canvas.height = 600;
     document.body.appendChild(canvas);
 
-    const engine = new BABYLON.Engine(canvas, true);
+    const engine = new BABYLON.Engine(canvas, true); 
 
-   
-
-    const enemyBullets = [];
+  const enemyBullets = [];
 
     function createEnemyBullet(position, material) {
         const bullet = BABYLON.MeshBuilder.CreateBox('enemyBullet', { width: 10, height: 2, depth: 1 }, scene);
@@ -18,11 +16,14 @@ window.addEventListener('DOMContentLoaded', function () {
         enemyBullets.push(bullet);
         playShootSound();
     }
+  
+
+    
 
     const createScene = function () {
         const scene = new BABYLON.Scene(engine);
         scene.clearColor = new BABYLON.Color3(0, 0, 1);
-
+    
         const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 0, -100), scene);
         camera.setTarget(BABYLON.Vector3.Zero());
         camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
@@ -30,18 +31,18 @@ window.addEventListener('DOMContentLoaded', function () {
         camera.orthoBottom = -canvas.height / 2;
         camera.orthoLeft = -canvas.width / 2;
         camera.orthoRight = canvas.width / 2;
-
+    
         const spaceshipMaterial = new BABYLON.StandardMaterial('spaceshipMaterial', scene);
         spaceshipMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
-
+    
         const spaceship = BABYLON.MeshBuilder.CreateBox('spaceship', { width: 50, height: 30, depth: 1 }, scene);
         spaceship.position.x = -350;
         spaceship.position.z = 1;
         spaceship.material = spaceshipMaterial;
-
+    
         const bullets = [];
         const enemies = [];
-
+    
         const onKeyDown = function (event) {
             if (event.key === 'ArrowUp') {
                 spaceship.position.y += 10;
@@ -61,37 +62,37 @@ window.addEventListener('DOMContentLoaded', function () {
                 playShootSound();
             }
         };
-
+    
         scene.onKeyboardObservable.add(({ event }) => onKeyDown(event), BABYLON.KeyboardEventTypes.KEYDOWN);
-
+    
         // Touch-Event-Listener hinzufügen
         canvas.addEventListener('touchstart', (event) => {
             event.preventDefault();
             const touch = event.touches[0];
             const touchX = touch.clientX - canvas.width / 2;
             const touchY = -touch.clientY + canvas.height / 2;
-
+    
             spaceship.position.x = touchX;
             spaceship.position.y = touchY;
         });
-
+    
         canvas.addEventListener('touchmove', (event) => {
             event.preventDefault();
             const touch = event.touches[0];
             const touchX = touch.clientX - canvas.width / 2;
             const touchY = -touch.clientY + canvas.height / 2;
-
+    
             spaceship.position.x = touchX;
             spaceship.position.y = touchY;
         });
-
+    
         let enemySpawnCounter = 0;
-
+    
         scene.registerBeforeRender(() => {
             // Sidescrolling
             camera.position.x += 1;
             spaceship.position.x += 1;
-
+    
             // Update bullets
             bullets.forEach((bullet, index) => {
                 bullet.position.x += 5;
@@ -100,7 +101,7 @@ window.addEventListener('DOMContentLoaded', function () {
                     bullets.splice(index, 1);
                 }
             });
-
+    
             // Update enemy bullets
             enemyBullets.forEach((bullet, index) => {
                 bullet.position.x -= 5;
@@ -109,7 +110,7 @@ window.addEventListener('DOMContentLoaded', function () {
                     enemyBullets.splice(index, 1);
                 }
             });
-
+    
             // Update enemies
             enemies.forEach((enemy, index) => {
                 enemy.position.x -= 2;
@@ -118,28 +119,31 @@ window.addEventListener('DOMContentLoaded', function () {
                     enemies.splice(index, 1);
                 }
             });
-
+    
             // Spawn enemies
             enemySpawnCounter++;
             if (enemySpawnCounter >= 100) {
                 const enemyMaterial = new BABYLON.StandardMaterial('enemyMaterial', scene);
-                enemyMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
-
+                enemyMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0); // set the diffuse color to red
+                
                 const enemy = BABYLON.MeshBuilder.CreateBox('enemy', { width: 30, height: 30, depth: 1 }, scene);
                 enemy.position.x = camera.position.x + canvas.width / 2;
                 enemy.position.y = Math.random() * (canvas.height - 60) - (canvas.height / 2 - 30);
                 enemy.position.z = 1;
-                enemy.material = enemyMaterial;
+                enemy.material = enemyMaterial; // assign the material to the enemy
                 enemies.push(enemy);
-
+                
+              
+                
+    
                 enemySpawnCounter = 0;
-
+    
                 // Make enemy shoot
                 setTimeout(() => {
                     createEnemyBullet(enemy.position, spaceshipMaterial);
                 }, 1000);
             }
-
+    
             // Detect collisions between bullets and enemies
             bullets.forEach((bullet, bulletIndex) => {
                 enemies.forEach((enemy, enemyIndex) => {
@@ -147,20 +151,21 @@ window.addEventListener('DOMContentLoaded', function () {
                         Math.abs(bullet.position.y - enemy.position.y) < 20) {
                         bullet.dispose();
                         bullets.splice(bulletIndex, 1);
-
+    
                         enemy.dispose();
                         enemies.splice(enemyIndex, 1);
-
+    
                         playHitSound();
                     }
                 });
             });
         });
-
+    
         return scene;
     };
-
+    
     const scene = createScene();
+    
 
     engine.runRenderLoop(function () {
         scene.render();
